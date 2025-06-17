@@ -1,56 +1,59 @@
-import { useState } from 'react';
+import { useRef } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Board from './Board';
-
-const directions = ['NORTH', 'EAST', 'SOUTH', 'WEST'];
-
-function getNextDirection(current, turn) {
-  const idx = directions.indexOf(current);
-  if (turn === 'LEFT') return directions[(idx + 3) % 4];
-  if (turn === 'RIGHT') return directions[(idx + 1) % 4];
-  return current;
-}
+import { getRobotPosition, sendRobotCommand } from './robotApi';
 
 export default function App() {
-  const [robot, setRobot] = useState(null); // {x, y, direction}
-  const [report, setReport] = useState('');
+  const queryClient = useQueryClient();
+  const reportRef = useRef(null);
+
+  // Query for robot position
+  const {
+    data: robot,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ['robot'],
+    queryFn: getRobotPosition,
+  });
+
+  // Mutation for robot commands
+  const mutation = useMutation({
+    mutationFn: sendRobotCommand,
+    onSuccess: () => queryClient.invalidateQueries(['robot']),
+  });
 
   const handleCellClick = (x, y) => {
-    setRobot({ x, y, direction: 'NORTH' });
-    setReport('');
+    mutation.mutate({ type: 'PLACE', x, y, direction: 'NORTH' });
+    if (reportRef.current) reportRef.current.textContent = '';
   };
 
   const handleMove = () => {
     if (!robot) return;
-    let { x, y, direction } = robot;
-    if (direction === 'NORTH' && y < 4) y++;
-    if (direction === 'SOUTH' && y > 0) y--;
-    if (direction === 'EAST' && x < 4) x++;
-    if (direction === 'WEST' && x > 0) x--;
-    setRobot({ x, y, direction });
-    setReport('');
+    mutation.mutate({ type: 'MOVE' });
+    if (reportRef.current) reportRef.current.textContent = '';
   };
 
   const handleLeft = () => {
     if (!robot) return;
-    setRobot({
-      ...robot,
-      direction: getNextDirection(robot.direction, 'LEFT'),
-    });
-    setReport('');
+    mutation.mutate({ type: 'LEFT' });
+    if (reportRef.current) reportRef.current.textContent = '';
   };
 
   const handleRight = () => {
     if (!robot) return;
-    setRobot({
-      ...robot,
-      direction: getNextDirection(robot.direction, 'RIGHT'),
-    });
-    setReport('');
+    mutation.mutate({ type: 'RIGHT' });
+    if (reportRef.current) reportRef.current.textContent = '';
   };
 
-  const handleReport = () => {
+  const handleReport = async () => {
     if (!robot) return;
-    setReport(`${robot.x},${robot.y},${robot.direction}`);
+    // Refetch to get latest position
+    const { data } = await refetch();
+    if (data && reportRef.current) {
+      reportRef.current.textContent = `Output: ${data.x},${data.y},${data.direction}`;
+    }
   };
 
   // Keyboard controls
@@ -70,7 +73,13 @@ export default function App() {
       <div className="mb-6 p-4 bg-slate-800 rounded-lg text-center w-full max-w-xl">
         Click to place the robot, use the buttons or arrows to move
       </div>
-      <Board robot={robot} onCellClick={handleCellClick} />
+      {isLoading ? (
+        <div className="text-cyan-300">Loading...</div>
+      ) : isError ? (
+        <div className="text-red-400">Error loading robot position</div>
+      ) : (
+        <Board robot={robot} onCellClick={handleCellClick} />
+      )}
       <div className="flex gap-4 mt-8">
         <button
           className="bg-cyan-600 px-6 py-2 rounded font-bold hover:bg-cyan-500"
@@ -97,11 +106,10 @@ export default function App() {
       >
         Report
       </button>
-      {report && (
-        <div className="mt-4 text-cyan-300 text-lg font-mono">
-          Output: {report}
-        </div>
-      )}
+      <div
+        ref={reportRef}
+        className="mt-4 text-cyan-300 text-lg font-mono"
+      ></div>
     </div>
   );
 }

@@ -47,6 +47,7 @@ export class RobotService {
   private async getCurrentRobot(): Promise<Robot | null> {
     return this.robotRepository.findOne({
       order: { updatedAt: 'DESC' },
+      where: {},
     });
   }
 
