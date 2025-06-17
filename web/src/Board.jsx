@@ -1,3 +1,4 @@
+import React from 'react';
 import Robot from './Robot';
 
 export default function Board({ robot, onCellClick }) {
@@ -11,6 +12,7 @@ export default function Board({ robot, onCellClick }) {
         return (
           <div
             key={idx}
+            role="gridcell"
             className="w-20 h-20 flex items-center justify-center bg-slate-800 border border-slate-600 cursor-pointer hover:bg-slate-600 transition-colors relative"
             onClick={() => onCellClick(x, y)}
           >
