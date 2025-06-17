@@ -14,4 +14,4 @@ export class RobotPositionDto {
 
   @IsEnum(Direction)
   direction: Direction;
-} 
+}
