@@ -1,5 +1,20 @@
 import axios from 'axios';
 
+export const Direction = {
+  NORTH: 'NORTH',
+  SOUTH: 'SOUTH',
+  EAST: 'EAST',
+  WEST: 'WEST',
+};
+
+export const CommandType = {
+  PLACE: 'PLACE',
+  MOVE: 'MOVE',
+  LEFT: 'LEFT',
+  RIGHT: 'RIGHT',
+  REPORT: 'REPORT',
+};
+
 const API_URL = 'http://localhost:3000/robot';
 
 export async function getRobotPosition() {

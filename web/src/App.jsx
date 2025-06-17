@@ -1,7 +1,12 @@
 import { useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Board from './Board';
-import { getRobotPosition, sendRobotCommand } from './robotApi';
+import {
+  getRobotPosition,
+  sendRobotCommand,
+  CommandType,
+  Direction,
+} from './robotApi';
 
 export default function App() {
   const queryClient = useQueryClient();
@@ -25,25 +30,30 @@ export default function App() {
   });
 
   const handleCellClick = (x, y) => {
-    mutation.mutate({ type: 'PLACE', x, y, direction: 'NORTH' });
+    mutation.mutate({
+      type: CommandType.PLACE,
+      x,
+      y,
+      direction: Direction.NORTH,
+    });
     if (reportRef.current) reportRef.current.textContent = '';
   };
 
   const handleMove = () => {
     if (!robot) return;
-    mutation.mutate({ type: 'MOVE' });
+    mutation.mutate({ type: CommandType.MOVE });
     if (reportRef.current) reportRef.current.textContent = '';
   };
 
   const handleLeft = () => {
     if (!robot) return;
-    mutation.mutate({ type: 'LEFT' });
+    mutation.mutate({ type: CommandType.LEFT });
     if (reportRef.current) reportRef.current.textContent = '';
   };
 
   const handleRight = () => {
     if (!robot) return;
-    mutation.mutate({ type: 'RIGHT' });
+    mutation.mutate({ type: CommandType.RIGHT });
     if (reportRef.current) reportRef.current.textContent = '';
   };
 

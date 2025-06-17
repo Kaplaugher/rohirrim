@@ -53,18 +53,30 @@ export class RobotService {
 
   private async place(command: RobotCommandDto): Promise<RobotPositionDto> {
     // Delete existing robot if any
+    await this.movementHistoryRepository.clear(); // Clear history first
     await this.robotRepository.clear();
 
+    // Create and save new robot
     const robot = this.robotRepository.create({
       x: command.x,
       y: command.y,
       direction: command.direction,
     });
 
-    await this.robotRepository.save(robot);
-    await this.recordMovement(command, robot);
+    const savedRobot = await this.robotRepository.save(robot);
 
-    return this.report(robot);
+    // Create movement history
+    const history = this.movementHistoryRepository.create({
+      command: command.type,
+      x: command.x,
+      y: command.y,
+      direction: command.direction,
+      robot: savedRobot,
+    });
+
+    await this.movementHistoryRepository.save(history);
+
+    return this.report(savedRobot);
   }
 
   private async move(robot: Robot): Promise<RobotPositionDto | null> {
@@ -76,10 +88,10 @@ export class RobotService {
 
     robot.x = newPosition.x;
     robot.y = newPosition.y;
-    await this.robotRepository.save(robot);
-    await this.recordMovement({ type: CommandType.MOVE }, robot);
+    const savedRobot = await this.robotRepository.save(robot);
+    await this.recordMovement({ type: CommandType.MOVE }, savedRobot);
 
-    return this.report(robot);
+    return this.report(savedRobot);
   }
 
   private async rotate(
@@ -99,10 +111,10 @@ export class RobotService {
         : (currentIndex + 1) % 4;
 
     robot.direction = directions[newIndex];
-    await this.robotRepository.save(robot);
-    await this.recordMovement({ type: direction }, robot);
+    const savedRobot = await this.robotRepository.save(robot);
+    await this.recordMovement({ type: direction }, savedRobot);
 
-    return this.report(robot);
+    return this.report(savedRobot);
   }
 
   private report(robot: Robot): RobotPositionDto {

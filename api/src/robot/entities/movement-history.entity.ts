@@ -31,7 +31,7 @@ export class MovementHistory {
   })
   direction: Direction;
 
-  @ManyToOne(() => Robot)
+  @ManyToOne(() => Robot, { onDelete: 'CASCADE' })
   @JoinColumn()
   robot: Robot;
 
