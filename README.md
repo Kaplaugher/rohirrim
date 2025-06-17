@@ -10,6 +10,12 @@ rohirrim/
 └── web/         # React frontend application
 ```
 
+## Screenshots
+<img width="849" alt="Screenshot 2025-06-17 at 5 15 42 PM" src="https://github.com/user-attachments/assets/7314a198-7554-4fd6-a953-2ac030457b8b" />
+
+<img width="873" alt="Screenshot 2025-06-17 at 5 16 00 PM" src="https://github.com/user-attachments/assets/ed771b6f-df9e-47d8-9ac0-3bbbaf03671b" />
+
+
 ## Features
 
 - Interactive 5x5 tabletop grid where clicking places the robot
@@ -27,6 +33,8 @@ rohirrim/
 - **REPORT**: Displays the current position and facing direction
 
 ## Technical Details
+
+- Created with Cursor IDE, Tailwind, NestJS, React, Tanstack Query, Vitest, Jest
 
 ### Backend (NestJS)
 - RESTful API endpoints for robot control
