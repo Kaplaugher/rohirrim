@@ -42,17 +42,12 @@ rohirrim/
 
 ## Setup Instructions
 
-### Prerequisites
-- Node.js (v16 or higher)
-- pnpm (recommended) or npm
-- PostgreSQL (or your preferred database)
-
 ### Backend Setup
 ```bash
 cd api
 pnpm install
 # Configure your database connection in .env
-pnpm start:dev
+pnpm start
 ```
 
 ### Frontend Setup
@@ -94,10 +89,8 @@ pnpm dev
 ## Constraints
 
 - Robot must not fall off the table during movement
-- Initial PLACE command must be valid
 - Invalid moves are ignored
-- Only one robot can exist at a time
-- Robot not on table ignores commands
+
 
 ## Coordinate System
 

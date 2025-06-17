@@ -20,6 +20,7 @@ describe('RobotService', () => {
     historyRepo = {
       create: jest.fn(),
       save: jest.fn(),
+      clear: jest.fn(),
     };
     const module: TestingModule = await Test.createTestingModule({
       providers: [
