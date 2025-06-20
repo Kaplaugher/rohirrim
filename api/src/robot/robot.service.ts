@@ -28,7 +28,11 @@ export class RobotService {
 
     switch (command.type) {
       case CommandType.PLACE:
-        if (!command.x || !command.y || !command.direction) {
+        if (
+          command.x === undefined ||
+          command.y === undefined ||
+          !command.direction
+        ) {
           throw new BadRequestException('Invalid PLACE command parameters');
         }
         return this.place(command);
