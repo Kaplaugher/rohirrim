@@ -7,6 +7,7 @@ import {
   CommandType,
   Direction,
 } from './robotApi';
+import { toast } from 'sonner';
 
 export default function App() {
   const queryClient = useQueryClient();
@@ -27,6 +28,9 @@ export default function App() {
   const mutation = useMutation({
     mutationFn: sendRobotCommand,
     onSuccess: () => queryClient.invalidateQueries(['robot']),
+    onError: (error) => {
+      toast.error(error.message);
+    },
   });
 
   const handleCellClick = (x, y) => {
