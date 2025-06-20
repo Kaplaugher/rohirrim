@@ -2,6 +2,7 @@ import { Controller, Post, Body, Get } from '@nestjs/common';
 import { RobotService } from './robot.service';
 import { RobotCommandDto, CommandType } from './dto/robot-command.dto';
 import { RobotPositionDto } from './dto/robot-position.dto';
+import { BadRequestException } from '@nestjs/common';
 
 @Controller('robot')
 export class RobotController {
@@ -16,6 +17,18 @@ export class RobotController {
 
   @Get('position')
   async getCurrentPosition(): Promise<RobotPositionDto | null> {
-    return this.robotService.executeCommand({ type: CommandType.REPORT });
+    try {
+      return await this.robotService.executeCommand({
+        type: CommandType.REPORT,
+      });
+    } catch (error) {
+      if (
+        error instanceof BadRequestException &&
+        error.message === 'Robot must be placed on the board first'
+      ) {
+        return null;
+      }
+      throw error;
+    }
   }
 }
