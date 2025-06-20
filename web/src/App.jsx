@@ -29,7 +29,9 @@ export default function App() {
     mutationFn: sendRobotCommand,
     onSuccess: () => queryClient.invalidateQueries(['robot']),
     onError: (error) => {
-      toast.error(error.message);
+      const errorMessage =
+        error.response?.data?.message?.message || error.message;
+      toast.error(errorMessage);
     },
   });
 
