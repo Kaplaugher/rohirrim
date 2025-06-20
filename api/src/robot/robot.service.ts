@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Robot } from './entities/robot.entity';
@@ -19,17 +19,18 @@ export class RobotService {
     private movementHistoryRepository: Repository<MovementHistory>,
   ) {}
 
-  async executeCommand(
-    command: RobotCommandDto,
-  ): Promise<RobotPositionDto | null> {
+  async executeCommand(command: RobotCommandDto): Promise<RobotPositionDto> {
     const robot = await this.getCurrentRobot();
 
     if (!robot && command.type !== CommandType.PLACE) {
-      return null;
+      throw new BadRequestException('Robot must be placed on the board first');
     }
 
     switch (command.type) {
       case CommandType.PLACE:
+        if (!command.x || !command.y || !command.direction) {
+          throw new BadRequestException('Invalid PLACE command parameters');
+        }
         return this.place(command);
       case CommandType.MOVE:
         return this.move(robot);
@@ -40,7 +41,7 @@ export class RobotService {
       case CommandType.REPORT:
         return this.report(robot);
       default:
-        return null;
+        throw new BadRequestException('Invalid command type');
     }
   }
 
@@ -52,6 +53,16 @@ export class RobotService {
   }
 
   private async place(command: RobotCommandDto): Promise<RobotPositionDto> {
+    if (
+      !this.isValidPosition({
+        x: command.x,
+        y: command.y,
+        direction: command.direction,
+      })
+    ) {
+      throw new BadRequestException('Invalid position for placement');
+    }
+
     // Delete existing robot if any
     await this.movementHistoryRepository.clear(); // Clear history first
     await this.robotRepository.clear();
@@ -79,11 +90,11 @@ export class RobotService {
     return this.report(savedRobot);
   }
 
-  private async move(robot: Robot): Promise<RobotPositionDto | null> {
+  private async move(robot: Robot): Promise<RobotPositionDto> {
     const newPosition = this.calculateNewPosition(robot);
 
     if (!this.isValidPosition(newPosition)) {
-      return null;
+      throw new BadRequestException('Move would place robot out of bounds');
     }
 
     robot.x = newPosition.x;
